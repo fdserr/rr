@@ -15,7 +15,7 @@
 (defmacro defaction [label args & body]
  "An action is a (pure) function (state:map, & args:printable -> state:map)."
   `(do
-    (def ~label (memoize (fn ~args ~@body)))
+    (def ~(with-meta label (meta label)) (memoize (fn ~args ~@body)))
     (defmethod rr.core/rf
                ~(keyword (str *ns*) (name label))
                [~(first args) [~'_ ~@(rest args)]]

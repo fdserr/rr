@@ -26,56 +26,6 @@
  [state _]
  state)
 
-;; State management.
-
-(defn validator [{:keys [::initial-state ::actions-history]}]
- (let [r (reduce rf initial-state actions-history)]
-  ;TODO (conform r)
-  true))
-
-(defonce store
-  (atom {::initial-state {}
-         ::actions-history []}))
-        ; :validator validator))
-
-(declare
- play
- xf-sfx-result
- xf-sfx-step
- log!
- render!)
-
-(defn render-watch [f]
- (let [xf (xf-sfx-result f)]
-  (add-watch store :render #(play xf %4))))
-
-;; Dispatch action (internal use, see disp! macro).
-
-(defn -disp!
- [& args]
- (swap! store update-in [::actions-history] conj (vec args))
- nil)
-
-;; Default xform.
-
-(def ^:dynamic *xf*
- (comp
-  (filter (fn [[kw & _]] (not= kw ::no-op)))
-  (xf-sfx-step log!)
-  (xf-sfx-result render!)))
-
-;; Transdux!
-
-(defn play
- ([]
-  (play @store))
- ([s]
-  (let [{:keys [::initial-state ::actions-history]} s]
-   (transduce *xf* rf initial-state actions-history)))
- ([xf s]
-  (binding [*xf* xf]
-   (play s))))
-
 ;; Default transducers.
 
 (defn xf-sfx-result [f!]
@@ -140,6 +90,51 @@
 
 (defn render! [r]
  (.info js/console (str "RENDER:\n" (with-out-str (pprint r)))))
+
+;; State management.
+
+(defn validator [{:keys [::initial-state ::actions-history]}]
+ (let [r (reduce rf initial-state actions-history)]
+  ;TODO (conform r)
+  true))
+
+(defonce store
+  (atom {::initial-state {}
+         ::actions-history []}))
+        ; :validator validator))
+
+(declare play)
+
+(defn render-watch [f]
+ (let [xf (xf-sfx-result f)]
+  (add-watch store :render #(play xf %4))))
+
+;; Dispatch action (internal use, see disp! macro).
+
+(defn -disp!
+ [& args]
+ (swap! store update-in [::actions-history] conj (vec args))
+ nil)
+
+;; Default xform.
+
+(def ^:dynamic *xf*
+ (comp
+  (filter (fn [[kw & _]] (not= kw ::no-op)))
+  (xf-sfx-step log!)
+  (xf-sfx-result render!)))
+
+;; Transdux!
+
+(defn play
+ ([]
+  (play @store))
+ ([s]
+  (let [{:keys [::initial-state ::actions-history]} s]
+   (transduce *xf* rf initial-state actions-history)))
+ ([xf s]
+  (binding [*xf* xf]
+   (play s))))
 
 ;; Figwheel: play on code reload
 
