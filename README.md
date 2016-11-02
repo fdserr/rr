@@ -58,16 +58,18 @@ Then mentally map it to that:
 ```
 Read: apply `apply` to `action1` and the `initial-state`; then apply `apply` to `action2` and the previous resulting state; then apply `apply`... when the list is exhausted (reduced), the returned value is the `current-state`. As "universal and expressive" as it gets.
 
-This simple and powerful concept is being highly popularized by [Redux JS](http://redux.js.org/). rr aims to push it a bit further in matter of ease of use, robustness and expressiveness ("rr" stands for "redux redux").
+This simple and powerful concept is being highly popularized by [Redux JS](http://redux.js.org/), inspired by [Elm Architecture](https://guide.elm-lang.org/architecture/).
 
-## Why?
+rr aims to push it a bit further in matter of ease of use, robustness and expressiveness ("rr" stands for "redux redux").
 
+## Rationale
+
+- Simple API: `defaction` and `disp!`.
 - No mutable app-state.
 - Code change of previous actions is taken into account, state is never stale.
 - Actions are printable (serializable).
-- Optimal (actions fns are memoized).
-- Transduce: simple xforms for logging, rendering and debugging.
-- Simple API: `defaction` and `disp!`.
+- Optimized: actions yeld memoized functions.
+- Transducer friendly: simple xforms for logging, rendering and debugging.
 
 ## Status
 
