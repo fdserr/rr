@@ -11,7 +11,7 @@ cd rr
 lein do cljsbuild once min, install
 ```
 Add the following entry to your project.clj :dependencies:
-   `[rr "0.0.1"]`
+   `[rr "0.1.0-SNAPSHOT"]`
 
 ## Example
 
@@ -39,6 +39,15 @@ Check your JS console.
 
 ## Overview
 
+- Simple API: `defaction` and `disp!`.
+- No mutable app-state.
+- Code change of previous actions is taken into account, state is never stale.
+- Actions are printable (serializable).
+- Optimized: actions yield memoized functions.
+- Transducer friendly: simple xforms provided for logging, rendering and debugging.
+
+## Rationale
+
 __"[...] every primitive recursive function on lists can be redefined in terms of
 fold."__
 
@@ -62,14 +71,6 @@ This simple and powerful concept is being highly popularized by [Redux JS](http:
 
 rr aims to push it a bit further in matter of ease of use, robustness and expressiveness ("rr" stands for "redux redux").
 
-## Rationale
-
-- Simple API: `defaction` and `disp!`.
-- No mutable app-state.
-- Code change of previous actions is taken into account, state is never stale.
-- Actions are printable (serializable).
-- Optimized: actions yeld memoized functions.
-- Transducer friendly: simple xforms for logging, rendering and debugging.
 
 ## Status
 

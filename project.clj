@@ -1,5 +1,5 @@
-(defproject rr "0.0.1"
-  :description "Redux redux in ClojureScript."
+(defproject rr "0.1.0-SNAPSHOT"
+  :description "Redux redux for ClojureScript."
   :url "https://github.com/fdserr/rr"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}

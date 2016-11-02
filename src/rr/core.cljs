@@ -2,9 +2,7 @@
   (:require [clojure.pprint :refer [pprint]]))
 
 ;; TODO:
-;; - cleanup, rename to Transdux
 ;; - robust, easy example (ns require, rum?, debug, repl vs run)
-;; - doc, readme
 ;; ---
 ;; - action doc & metadata
 ;; - cljs/spec
@@ -13,7 +11,72 @@
 
 (enable-console-print!)
 
-;; Useful transducers in the context of t-dux.
+;; Polymorphic reducing function (internal use, see defaction macro).
+
+(defmulti rf
+ (fn
+  ([_] ::done)
+  ([_ [kw & _]] kw)))
+
+(defmethod rf ::done
+ [state]
+ state)
+
+(defmethod rf ::no-op
+ [state _]
+ state)
+
+;; State management.
+
+(defn validator [{:keys [::initial-state ::actions-history]}]
+ (let [r (reduce rf initial-state actions-history)]
+  ;TODO (conform r)
+  true))
+
+(defonce store
+  (atom {::initial-state {}
+         ::actions-history []}))
+        ; :validator validator))
+
+(declare
+ play
+ xf-sfx-result
+ xf-sfx-step
+ log!
+ render!)
+
+(defn render-watch [f]
+ (let [xf (xf-sfx-result f)]
+  (add-watch store :render #(play xf %4))))
+
+;; Dispatch action (internal use, see disp! macro).
+
+(defn -disp!
+ [& args]
+ (swap! store update-in [::actions-history] conj (vec args))
+ nil)
+
+;; Default xform.
+
+(def ^:dynamic *xf*
+ (comp
+  (filter (fn [[kw & _]] (not= kw ::no-op)))
+  (xf-sfx-step log!)
+  (xf-sfx-result render!)))
+
+;; Transdux!
+
+(defn play
+ ([]
+  (play @store))
+ ([s]
+  (let [{:keys [::initial-state ::actions-history]} s]
+   (transduce *xf* rf initial-state actions-history)))
+ ([xf s]
+  (binding [*xf* xf]
+   (play s))))
+
+;; Default transducers.
 
 (defn xf-sfx-result [f!]
  "Transducer to apply side-effecting function f! to the final result
@@ -78,70 +141,10 @@
 (defn render! [r]
  (.info js/console (str "RENDER:\n" (with-out-str (pprint r)))))
 
-;; Default xform.
-
-(def ^:dynamic *xf*
- (comp
-  (filter (fn [[kw & _]] (not= kw ::no-op)))
-  (xf-sfx-step log!)
-  (xf-sfx-result render!)))
-
-;; Polymorphic reducing function (internal use, see defaction macro).
-
-(defmulti rf
- (fn
-  ([_] ::done)
-  ([_ [kw & _]] kw)))
-
-(defmethod rf ::done
- [state]
- state)
-
-(defmethod rf ::no-op
- [state _]
- state)
-
-;; State management.
-
-(defn validator [{:keys [::initial-state ::actions-history]}]
- (let [r (reduce rf initial-state actions-history)]
-  ;TODO (conform r)
-  true))
-
-(defonce store
-  (atom {::initial-state {}
-         ::actions-history []}))
-        ; :validator validator))
-
-(declare play)
-
-(defn render-watch [f]
- (let [xf (xf-sfx-result f)]
-  (add-watch store :render #(play xf %4))))
-
-;; Dispatch action (internal use, see disp! macro).
-
-(defn -disp!
- [& args]
- (swap! store update-in [::actions-history] conj (vec args))
- nil)
-
-;; Transdux!
-
-(defn play
- ([]
-  (play @store))
- ([s]
-  (let [{:keys [::initial-state ::actions-history]} s]
-   (transduce *xf* rf initial-state actions-history)))
- ([xf s]
-  (binding [*xf* xf]
-   (play s))))
-
-;; Figwheel: t-dux on code reload
+;; Figwheel: play on code reload
 
 (defn on-js-reload []
- ; (t-dux (comp (take 10) *xf* xf-history) @store)
+ ; (play (comp (take 10) *xf* xf-history) @store)
  (play @store))
 
 ;; Example ;;;;;;;;;;;;;;;;;;;;;;;;;;
