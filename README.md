@@ -34,6 +34,8 @@ cljs.user=> (rr/defaction mult [state x] (update-in state [:val] * 10 x))
 #object[cljs.core.MultiFn]
 cljs.user=> (rr/play)
 {:val 105}
+cljs.user=> (rr/commit!)
+{:val 105}
 ```
 Check your JS console.
 

@@ -136,11 +136,20 @@
   (binding [*xf* xf]
    (play s))))
 
+(defn commit! []
+ (::initial-state
+  (swap! store (fn [s]
+                (let [v (play s)]
+                 (-> s
+                  (assoc ::initial-state v)
+                  (assoc ::actions-history [])))))))
+
+
 ;; Figwheel: play on code reload
 
 (defn on-js-reload []
  ; (play (comp (take 10) *xf* xf-history) @store)
- (play @store))
+ (play))
 
 ;; Example ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
