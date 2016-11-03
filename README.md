@@ -81,7 +81,6 @@ Wet paint.
 TODO:
 - Spec rr
 - Leverage spec / exercise actions.
-- Commit reduction.
 - Server side replay, sync up.
 - Kewl debugger.
 
