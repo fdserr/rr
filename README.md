@@ -38,7 +38,6 @@ cljs.user=> (rr/play)
 cljs.user=> (rr/commit!)
 {:val 105}
 ```
-Check your JS console.
 
 ## Overview
 
@@ -51,12 +50,11 @@ Check your JS console.
 
 ## Rationale
 
-__"[...] every primitive recursive function on lists can be redefined in terms of
-fold."__
-
-_Graham Hutton, (1999) A Tutorial on the Universality
+_[...] every primitive recursive function on lists can be redefined in terms of
+fold._
+Graham Hutton, (1999) A Tutorial on the Universality
 and Expressiveness of Fold. Journal of Functional
-Programming, 9 (4). pp. 355-372._
+Programming, 9 (4). pp. 355-372.
 
 In Land of LISP, `fold`'s name is `reduce`. Consider this:
 ```clj
@@ -71,9 +69,6 @@ Then mentally map it to that:
 Read: apply `apply` to `action1` and the `initial-state`; then apply `apply` to `action2` and the previous resulting state; then apply `apply`... when the list is exhausted (reduced), the returned value is the `current-state`. As "universal and expressive" as it gets.
 
 This simple and powerful concept is being highly popularized by [Redux JS](http://redux.js.org/), inspired by [Elm Architecture](https://guide.elm-lang.org/architecture/).
-
-rr aims to push it a bit further in matter of ease of use, robustness and expressiveness ("rr" stands for "redux redux").
-
 
 ## Status
 
