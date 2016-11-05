@@ -11,14 +11,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-; (-> '(rr/defaction example [s a b] (prn a) (+ a b))
-;  (macroexpand-1)
-;  (pprint)
-;  (with-out-str)
-;  (println))
-
-
 (rr/defaction init [s]
  (-> s
   (dissoc :editing)

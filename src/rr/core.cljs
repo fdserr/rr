@@ -2,12 +2,17 @@
   (:require [clojure.pprint :refer [pprint]]))
 
 ;; TODO:
-;; - robust, easy example (ns require, rum?, debug, repl vs run)
-;; ---
-;; - action doc & metadata
-;; - cljs/spec
+;; - specs / tests
+;; - should commit! take default xf?
 ;; - debugger
+;; - optimize example (require rr, rum?)
 ;;
+
+;; CHANGES:
+;; 0.1.1
+;; - add: rf arity 0
+;; - add: defaction can take a docstring and metadata (cljs "meta" gotchas still apply).
+
 
 (enable-console-print!)
 
@@ -15,8 +20,13 @@
 
 (defmulti rf
  (fn
+  ([] ::rf)
   ([_] ::done)
   ([_ [kw & _]] kw)))
+
+(defmethod rf ::rf
+ []
+ (with-meta {} ::rr-state))
 
 (defmethod rf ::done
  [state]
@@ -137,6 +147,7 @@
    (play s))))
 
 (defn commit! []
+ ""
  (::initial-state
   (swap! store (fn [s]
                 (let [v (play s)]
@@ -153,15 +164,30 @@
 
 ;; Example ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
+
 (comment
+ ;; Hit CMD-S to render once.
 
  (in-ns 'rr.example)
-
- (rr/disp! init)
  (rr/disp! add-todo {:title "Write specs."})
  (rr/disp! add-todo {:title "Develop awesome debug tools."})
  (rr/disp! toggle-todo 1)
 
- @store
+ @rr/store
 
  nil) ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; (->
+;  '(defaction
+;    ^:foo
+;    example
+;    "awesome doc"
+;    {:foo :bar}
+;    [s a b]
+;    (prn a)
+;    (+ a b))
+;  (macroexpand-1)
+;  (pprint)
+;  (with-out-str)
+;  (println))

@@ -1,6 +1,6 @@
 # rr
 
-rr (pronounced "rr") is a tiny ClojureScript library for state management. Without storing state, as the name implies.
+rr (pronounced "rr") is a tiny ClojureScript library for state management. Without mutable state, as the name implies.
 
 ## Usage
 
@@ -11,7 +11,8 @@ cd rr
 lein do cljsbuild once min, install
 ```
 Add the following entry to your project.clj :dependencies:
-   `[rr "0.1.0-SNAPSHOT"]`
+
+   `[rr "0.1.1-SNAPSHOT"]`
 
 ## Example
 
@@ -42,11 +43,11 @@ Check your JS console.
 ## Overview
 
 - Simple API: `defaction` and `disp!`.
-- No mutable app-state.
-- Code change of previous actions is taken into account, state is never stale.
+- No mutable app-state atom.
+- Code change of previously executed actions is taken into account, state is never stale.
 - Actions are printable (serializable).
-- Optimized: actions yield memoized functions.
-- Transducer friendly: simple xforms provided for logging, rendering and debugging.
+- Fast reduction: actions yield memoized functions.
+- Transducer friendly, simple xforms provided for logging, rendering and debugging.
 
 ## Rationale
 
@@ -76,7 +77,7 @@ rr aims to push it a bit further in matter of ease of use, robustness and expres
 
 ## Status
 
-Wet paint.
+Wet paint. More paint coming.
 
 TODO:
 - Spec rr
