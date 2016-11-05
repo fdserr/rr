@@ -4,7 +4,7 @@ rr (pronounced "rr") is a tiny ClojureScript library for state management. Witho
 
 ## Usage
 
-Not yet released on clojars, build and install locally:
+Not yet pushed to clojars, build and install locally:
 ```
 git clone https://github.com/fdserr/rr.git
 cd rr
@@ -41,12 +41,12 @@ cljs.user=> (rr/commit!)
 
 ## Overview
 
-- Simple API: `defaction` and `disp!`.
-- No mutable app-state atom.
-- Code change of previously executed actions is taken into account, state is never stale.
-- Actions are printable (serializable).
+- Simple API: `defaction` and `disp!`, `play` and `commit!`.
+- Immmutable state, no atom.
+- Code change of previously executed actions is reloadable, current state is never stale.
+- Open: actions are printable data (serializable).
 - Fast reduction: actions yield memoized functions.
-- Transducer friendly, simple xforms provided for logging, rendering and debugging.
+- Transducer friendly, xforms provided for logging, rendering and debugging.
 
 ## Rationale
 
@@ -66,9 +66,9 @@ Then mentally map it to that:
 (reduce apply initial-state [action1 action2 action3])
 => current-state
 ```
-Read: apply `apply` to `action1` and the `initial-state`; then apply `apply` to `action2` and the previous resulting state; then apply `apply`... when the list is exhausted (reduced), the returned value is the `current-state`. As "universal and expressive" as it gets.
+Read: apply `apply` to `action1` and the `initial-state`; then apply `apply` to `action2` and the previous resulting state; then apply `apply`... when the list is exhausted (reduced), the returned value is the `current-state`.
 
-This simple and powerful concept is being highly popularized by [Redux JS](http://redux.js.org/), inspired by [Elm Architecture](https://guide.elm-lang.org/architecture/).
+Reduce/fold as "universal and expressive" as it gets. This concept, popularized by [Redux JS](http://redux.js.org/), and inspired by the [Elm Architecture](https://guide.elm-lang.org/architecture/), will maybe help ClojureScript users to get over with the relatively complected usage of atoms to manage app state.
 
 ## Status
 
