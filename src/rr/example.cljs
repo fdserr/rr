@@ -11,6 +11,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Look Ma, no deref, no swap!
+
 (rr/defaction init [s]
  (-> s
   (dissoc :editing)
@@ -19,9 +21,9 @@
 (rr/defaction edit [s v]
  (assoc-in s [:editing] v))
 
-(rr/defaction add-todo [s v]
+(rr/defaction add-todo [s]
  (-> s
-  (update-in [:todos] conj v)
+  (update-in [:todos] conj (:editing s))
   (dissoc :editing)))
 
 (rr/defaction toggle-todo [s i]
@@ -29,45 +31,65 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn- handle-change [e]
+ (let [v (.-value (.-target e))]
+  (rr/disp! edit {:title v})))
+
+(defn- handle-submit [_]
+ (rr/disp! add-todo))
+
+(rum/defc form < rum/static [form-value form-disabled]
+ [:div#form {}
+  [:input.new-todo {:value form-value
+                    :placeholder "What needs to be done?"
+                    :on-change handle-change}]
+  [:button {:on-click handle-submit
+            :disabled form-disabled}
+    "Add!"]])
+
+;;----
+
+(defn- handle-toggle-todo [i]
+ (rr/disp! toggle-todo i))
+
+(rum/defc todo < rum/static [i e done]
+ (let [css-class ["todo"]
+       css-class (if done
+                  (conj css-class "done")
+                  css-class)]
+  [:li {:class css-class
+        :on-click (partial handle-toggle-todo i)}
+   (:title e)]))
+
+;;----
+
+(defn- fn-todo [i e]
+ (rum/with-key (todo i e (:done e)) i))
+
+(rum/defc todos < rum/static [todo-list]
+ [:div#list {}
+  [:ul.todo-list
+   (map-indexed fn-todo todo-list)]])
+
+;;----
+
 (defn can-add-todo? [s]
  (let [i (:editing s)]
   (and
    (not= "" (:title i))
    (not (nil? (:title i))))))
 
-(rum/defc form < rum/static [s]
- [:div#form {}
-  [:input.new-todo {:value (get-in s [:editing :title] "")
-                    :placeholder "What needs to be done?"
-                    :on-change #(let [v (.-value (.-target %))]
-                                 (rr/disp! edit {:title v}))}]
-  [:button {:on-click #(rr/disp! add-todo (:editing s))
-            :disabled (not (can-add-todo? s))}
-    "Add!"]])
-
-(defn todo [i e]
- (let [css-class ["todo"]
-       css-class (if (:done e)
-                  (conj css-class "done")
-                  css-class)]
-  [:li {:class css-class
-        :key (str i)
-        :on-click #(rr/disp! toggle-todo i)}
-   (:title e)]))
-
-(rum/defc todos < rum/static [s]
- [:div#list {}
-  [:ul.todo-list
-   (map-indexed todo (:todos s))]])
-
 (rum/defc app < rum/static [s]
- (let [])
- [:div.todoapp
-  (form s)
-  (todos s)])
+ (let [form-value (get-in s [:editing :title] "")
+       form-disabled (not (can-add-todo? s))
+       todo-list (get-in s [:todos] [])]
+  [:div.todoapp
+   (form form-value form-disabled)
+   (todos todo-list)]))
+
+;;----
 
 ;; Save the file or run this code to initialize the app.
-
 (defonce _ (do
             (rr/render-watch
              #(rum/mount (app %) (.getElementById js/document "app")))
