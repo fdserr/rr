@@ -1,12 +1,6 @@
 (ns ^:figwheel-always rr.example
-  (:require [clojure.pprint :refer [pprint]]
-            [clojure.spec :as spec]
-            [rr.core :as rr :include-macros true]
+  (:require [rr.core :as rr :include-macros true]
             [rum.core :as rum :include-macros true]))
-
-;; TODO
-;; - prettify app
-;; - specs
 
 (enable-console-print!)
 
@@ -23,7 +17,6 @@
  (assoc-in s [::editing] v))
 
 (rr/defaction add-todo [s]
- ; {:pre [(spec/valid? s ::editing)]}
  (-> s
   (update-in [::todos] conj (::editing s))
   (dissoc ::editing)))
@@ -33,11 +26,6 @@
 
 (defn not-empty? [s]
  (not (empty? s)))
-
-(spec/def ::title (spec/and string? not-empty?))
-(spec/def ::done boolean?)
-(spec/def ::todo (spec/keys :req [::title] :opt [::done]))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

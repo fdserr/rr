@@ -4,15 +4,9 @@ rr (pronounced "rr") is a tiny ClojureScript library for state management. Witho
 
 ## Usage
 
-Not yet pushed to clojars, build and install locally:
-```
-git clone https://github.com/fdserr/rr.git
-cd rr
-lein do cljsbuild once min, install
-```
 Add the following entry to your project.clj :dependencies:
 
-   `[rr "0.1.1-SNAPSHOT"]`
+   `[rr "0.1.1"]`
 
 ## Example
 
@@ -74,11 +68,16 @@ Reduce/fold as "universal and expressive" as it gets. This concept, popularized 
 
 Wet paint. More paint coming.
 
-TODO:
-- Spec rr
-- Leverage spec / exercise actions.
-- Server side replay, sync up.
-- Kewl debugger.
+## CHANGES:
+### 0.1.1
+- add: commit! arity 2 (pass your own store, Mr Hauman ^)
+- add: fifo memoization
+- add: rf arity 0
+- add: defaction can take a docstring and metadata (cljs "meta" gotchas still apply).
+- change: (BREAKING) play arity 1 and 2 params. no change to arity 0.
+- change: (BREAKING) removed render-watch, set watches directly on the store atom.
+- change: (BREAKING) removed default transform (log and render), set xf manually where needed.
+
 
 ## Development
 

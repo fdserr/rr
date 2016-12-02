@@ -1,23 +1,6 @@
 (ns rr.core
   (:require [clojure.pprint :refer [pprint]]))
 
-;; TODO:
-;; - specs / tests
-;; - should commit! take default xf?
-;; - debugger
-;; - optimize example (require rr, rum?)
-;;
-
-;; CHANGES:
-;; 0.1.1
-;; - add: commit! arity 2 (pass your own store, Mr Hauman ^)
-;; - fifo memoization
-;; - add: rf arity 0
-;; - add: defaction can take a docstring and metadata (cljs "meta" gotchas still apply).
-;; - change: (BREAKING) play arity 1 and 2 params. no change to arity 0.
-;; - change: (BREAKING) removed render-watch, set watches directly on the store atom.
-;; - change: (BREAKING) removed default transform (log and render), set xf manually where needed.
-
 (enable-console-print!)
 
 ;; Polymorphic reducing function (internal use, see defaction macro).
@@ -189,37 +172,3 @@
 (defn on-js-reload []
  ; (play (comp (take 10) *xf* xf-history) @store)
  (play))
-
-;; Example ;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Hit CMD-S to render once.
-
-(comment
-
- (in-ns 'rr.example)
- (rr/disp! edit {:title "Write specs."})
- (rr/disp! add-todo)
- (rr/disp! edit {:title "Develop awesome debug tools."})
- (rr/disp! add-todo)
- (rr/disp! toggle-todo 1)
- (rr/play)
- (rr/play rr/xf-history)
- (rr/commit!)
- (rr/play rr/xf-history)
-
- @rr/store
-
- nil) ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-; (->
-;  '(defaction
-;    ^:foo
-;    example
-;    "awesome doc"
-;    {:foo :bar}
-;    [s a b]
-;    (prn a)
-;    (+ a b))
-;  (macroexpand-1)
-;  (pprint)
-;  (with-out-str)
-;  (println))

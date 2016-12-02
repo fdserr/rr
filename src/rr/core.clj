@@ -1,26 +1,4 @@
-(ns rr.core
- (:require [clojure.spec :as spec]))
-          ;  [clojure.spec.test :as stest]))
-
-
-;; TODO
-;; - ensure state is first arg and is being returned (ouchy!)
-;; - fix to access cljs metadata?
-
-;; -- metadata
-;; this breaks cljs analyzer on second call at the REPL:
-; (defmacro var-data
-;   [sym]
-;   (cljs/resolve-var &env sym))
-
-;; -- specs tbc...
-; (spec/fdef defaction
-;  :args (spec/cat ::label simple-symbol?
-;                  ::args vector?
-;                  ::body (spec/or :s-expr seq?
-;                                  :symbol simple-symbol?))
-;  :ret any?)
-
+(ns rr.core)
 
 (defmacro defaction [& args]
  "An action is a (pure) function (state:map, & args:printable -> state:map)."

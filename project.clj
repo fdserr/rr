@@ -1,4 +1,4 @@
-(defproject rr "0.1.1-SNAPSHOT"
+(defproject rr "0.1.1"
   :description "Redux redux for ClojureScript."
   :url "https://github.com/fdserr/rr"
   :license {:name "Eclipse Public License"
@@ -8,10 +8,7 @@
 
   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/clojurescript "1.9.293"]
-                ;  [org.clojure/core.async "0.2.395"
-                ;   :exclusions [org.clojure/tools.reader]]
                  [rum "0.10.7"]]
-                ;  [imprimatur "0.1.4-SNAPSHOT"]]
 
   :plugins [[lein-figwheel "0.5.8"]
             [lein-cljsbuild "1.1.4" :exclusions [[org.clojure/clojure]]]]
