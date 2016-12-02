@@ -34,12 +34,9 @@
 (defn not-empty? [s]
  (not (empty? s)))
 
-; (spec/def ::title (spec/and string? not-empty?))
-; (spec/def ::done boolean?)
-; (spec/def ::todo (spec/keys :req [::title] :opt [::done]))
-; (spec/def ::editing (spec/keys :req [::editing]))
-; (spec/fdef add-todo
-;  :args (spec/cat ::s ::editing))
+(spec/def ::title (spec/and string? not-empty?))
+(spec/def ::done boolean?)
+(spec/def ::todo (spec/keys :req [::title] :opt [::done]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -90,7 +87,7 @@
  (let [i (::editing s)]
   (and
    (not= "" (::title i))
-   (not (nil? (::title i))))))
+   (some? (::title i)))))
 
 (rum/defc app < rum/static [s]
  (let [form-value (get-in s [::editing ::title] "")

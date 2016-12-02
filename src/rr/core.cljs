@@ -10,6 +10,7 @@
 
 ;; CHANGES:
 ;; 0.1.1
+;; - add: commit! arity 2 (pass your own store, Mr Hauman ^)
 ;; - fifo memoization
 ;; - add: rf arity 0
 ;; - add: defaction can take a docstring and metadata (cljs "meta" gotchas still apply).
@@ -151,15 +152,18 @@
   xf transducer. Empty the history of actions, such that initial state and
   reduction are equal. Idempotent."
  ([]
-  (::initial-state
-   (swap! store (fn [s]
-                 (let [v (play *xf* s)]
-                  (-> s
-                   (assoc ::initial-state v)
-                   (assoc ::actions-history [])))))))
+  (commit! *xf* store))
  ([xf]
   (binding [*xf* xf]
-   (commit!))))
+   (commit!)))
+ ([xf s]
+  (::initial-state
+   (swap! s (fn [m]
+             (let [v (play *xf* m)]
+              (-> m
+               (assoc ::initial-state v)
+               (assoc ::actions-history []))))))))
+
 
 ;;;;;;;;;
 
@@ -192,8 +196,10 @@
 (comment
 
  (in-ns 'rr.example)
- (rr/disp! add-todo {:title "Write specs."})
- (rr/disp! add-todo {:title "Develop awesome debug tools."})
+ (rr/disp! edit {:title "Write specs."})
+ (rr/disp! add-todo)
+ (rr/disp! edit {:title "Develop awesome debug tools."})
+ (rr/disp! add-todo)
  (rr/disp! toggle-todo 1)
  (rr/play)
  (rr/play rr/xf-history)
