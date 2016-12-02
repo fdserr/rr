@@ -1,5 +1,6 @@
 (ns ^:figwheel-always rr.example
   (:require [clojure.pprint :refer [pprint]]
+            [clojure.spec :as spec]
             [rr.core :as rr :include-macros true]
             [rum.core :as rum :include-macros true]))
 
@@ -15,25 +16,37 @@
 
 (rr/defaction init [s]
  (-> s
-  (dissoc :editing)
-  (assoc-in [:todos] [])))
+  (dissoc ::editing)
+  (assoc-in [::todos] [])))
 
 (rr/defaction edit [s v]
- (assoc-in s [:editing] v))
+ (assoc-in s [::editing] v))
 
 (rr/defaction add-todo [s]
+ ; {:pre [(spec/valid? s ::editing)]}
  (-> s
-  (update-in [:todos] conj (:editing s))
-  (dissoc :editing)))
+  (update-in [::todos] conj (::editing s))
+  (dissoc ::editing)))
 
 (rr/defaction toggle-todo [s i]
- (update-in s [:todos i :done] not))
+ (update-in s [::todos i ::done] not))
+
+(defn not-empty? [s]
+ (not (empty? s)))
+
+; (spec/def ::title (spec/and string? not-empty?))
+; (spec/def ::done boolean?)
+; (spec/def ::todo (spec/keys :req [::title] :opt [::done]))
+; (spec/def ::editing (spec/keys :req [::editing]))
+; (spec/fdef add-todo
+;  :args (spec/cat ::s ::editing))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- handle-change [e]
  (let [v (.-value (.-target e))]
-  (rr/disp! edit {:title v})))
+  (rr/disp! edit {::title v})))
 
 (defn- handle-submit [_]
  (rr/disp! add-todo))
@@ -59,12 +72,12 @@
                   css-class)]
   [:li {:class css-class
         :on-click (partial handle-toggle-todo i)}
-   (:title e)]))
+   (::title e)]))
 
 ;;----
 
 (defn- fn-todo [i e]
- (rum/with-key (todo i e (:done e)) i))
+ (rum/with-key (todo i e (::done e)) i))
 
 (rum/defc todos < rum/static [todo-list]
  [:div#list {}
@@ -74,15 +87,15 @@
 ;;----
 
 (defn can-add-todo? [s]
- (let [i (:editing s)]
+ (let [i (::editing s)]
   (and
-   (not= "" (:title i))
-   (not (nil? (:title i))))))
+   (not= "" (::title i))
+   (not (nil? (::title i))))))
 
 (rum/defc app < rum/static [s]
- (let [form-value (get-in s [:editing :title] "")
+ (let [form-value (get-in s [::editing ::title] "")
        form-disabled (not (can-add-todo? s))
-       todo-list (get-in s [:todos] [])]
+       todo-list (get-in s [::todos] [])]
   [:div.todoapp
    (form form-value form-disabled)
    (todos todo-list)]))
@@ -91,6 +104,6 @@
 
 ;; Save the file or run this code to initialize the app.
 (defonce _ (do
-            (rr/render-watch
-             #(rum/mount (app %) (.getElementById js/document "app")))
+            (add-watch rr/store ::render
+             #(rum/mount (app (rr/play)) (.getElementById js/document "app")))
             (rr/disp! init)))

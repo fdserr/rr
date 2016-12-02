@@ -1,6 +1,7 @@
-(ns rr.core)
- ; (:require [cljs.analyzer :as cljs]
- ;           [clojure.spec :as spec]))
+(ns rr.core
+ (:require [clojure.spec :as spec]))
+          ;  [clojure.spec.test :as stest]))
+
 
 ;; TODO
 ;; - ensure state is first arg and is being returned (ouchy!)
@@ -19,6 +20,7 @@
 ;                  ::body (spec/or :s-expr seq?
 ;                                  :symbol simple-symbol?))
 ;  :ret any?)
+
 
 (defmacro defaction [& args]
  "An action is a (pure) function (state:map, & args:printable -> state:map)."
@@ -41,8 +43,8 @@
        m (if doc (assoc m :doc doc) m)
        label (with-meta label m)]
   `(do
-    (def ~label (memoize (fn ~args ~@body)))
-    (defmethod rr.core/rf
+    (def ~label (memoize-fifo (fn ~args ~@body)))
+    (defmethod rf
                ~(keyword (str *ns*) (name label))
                [~(first args) [~'_ ~@(rest args)]]
                (~label ~@args)))))

@@ -10,9 +10,12 @@
 
 ;; CHANGES:
 ;; 0.1.1
+;; - fifo memoization
 ;; - add: rf arity 0
 ;; - add: defaction can take a docstring and metadata (cljs "meta" gotchas still apply).
-
+;; - change: (BREAKING) play arity 1 and 2 params. no change to arity 0.
+;; - change: (BREAKING) removed render-watch, set watches directly on the store atom.
+;; - change: (BREAKING) removed default transform (log and render), set xf manually where needed.
 
 (enable-console-print!)
 
@@ -87,23 +90,21 @@
       (vswap! h conj {:result r :step input})
       r))))))
 
-;; Default logging.
-
 (defn log!
+ "Default logging (JS console)."
  ([r] (log! r nil))
  ([r i] (let [pr (if i "STEP RESULT:\n" "FINAL RESULT:\n")
               sr (str pr (with-out-str (pprint r)))
               si (when i (str "STEP INPUT:\n" (with-out-str (pprint i))))]
          (.info js/console (str si sr)))))
 
-;; Default rendering.
-
 (defn render! [r]
+ "Default rendering (JS console)."
  (.info js/console (str "RENDER:\n" (with-out-str (pprint r)))))
 
 ;; State management.
 
-(defn validator [{:keys [::initial-state ::actions-history]}]
+(defn- validator [{:keys [::initial-state ::actions-history]}]
  (let [r (reduce rf initial-state actions-history)]
   ;TODO (conform r)
   true))
@@ -115,10 +116,6 @@
 
 (declare play)
 
-(defn render-watch [f]
- (let [xf (xf-sfx-result f)]
-  (add-watch store :render #(play xf %4))))
-
 ;; Dispatch action (internal use, see disp! macro).
 
 (defn -disp!
@@ -129,50 +126,79 @@
 ;; Default xform.
 
 (def ^:dynamic *xf*
- (comp
-  (filter (fn [[kw & _]] (not= kw ::no-op)))
-  (xf-sfx-step log!)
-  (xf-sfx-result render!)))
+ (map identity))
+ ; (comp
+ ;  (filter (fn [[kw & _]] (not= kw ::no-op)))
+ ;  (xf-sfx-step log!)
+ ;  (xf-sfx-result render!)))
 
 ;; Transdux!
 
 (defn play
+ "Run the reduction, with optional xf transform."
  ([]
-  (play @store))
- ([s]
-  (let [{:keys [::initial-state ::actions-history]} s]
-   (transduce *xf* rf initial-state actions-history)))
- ([xf s]
+  (play *xf* @store))
+ ([xf]
   (binding [*xf* xf]
-   (play s))))
+   (play)))
+ ([xf s]
+  (let [{:keys [::initial-state ::actions-history]} s]
+   (binding [*xf* xf]
+    (transduce *xf* rf initial-state actions-history)))))
 
-(defn commit! []
- ""
- (::initial-state
-  (swap! store (fn [s]
-                (let [v (play s)]
-                 (-> s
-                  (assoc ::initial-state v)
-                  (assoc ::actions-history [])))))))
+(defn commit!
+ "Set initial state to be the result of the reduction, with optional
+  xf transducer. Empty the history of actions, such that initial state and
+  reduction are equal. Idempotent."
+ ([]
+  (::initial-state
+   (swap! store (fn [s]
+                 (let [v (play *xf* s)]
+                  (-> s
+                   (assoc ::initial-state v)
+                   (assoc ::actions-history [])))))))
+ ([xf]
+  (binding [*xf* xf]
+   (commit!))))
 
+;;;;;;;;;
+
+(defn- fifo-assoc [m k v i]
+ (let [m (assoc m k v)
+       ks (keys m)
+       c (count ks)]
+  (if (< c i)
+   m
+   (select-keys m (rest ks)))))
+
+(defn- memoize-fifo
+  [f]
+  (let [mem (atom {})]
+    (fn [& args]
+      (if-let [e (find @mem args)]
+        (val e)
+        (let [ret (apply f args)]
+          (swap! mem fifo-assoc args ret 64)
+          ret)))))
 
 ;; Figwheel: play on code reload
-
 (defn on-js-reload []
  ; (play (comp (take 10) *xf* xf-history) @store)
  (play))
 
 ;; Example ;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
+;; Hit CMD-S to render once.
 
 (comment
- ;; Hit CMD-S to render once.
 
  (in-ns 'rr.example)
  (rr/disp! add-todo {:title "Write specs."})
  (rr/disp! add-todo {:title "Develop awesome debug tools."})
  (rr/disp! toggle-todo 1)
+ (rr/play)
+ (rr/play rr/xf-history)
+ (rr/commit!)
+ (rr/play rr/xf-history)
 
  @rr/store
 

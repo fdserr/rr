@@ -22,7 +22,7 @@
 
   :cljsbuild {:builds
               [{:id "dev"
-                :source-paths ["src"]
+                :source-paths ["src" "test"]
                 :figwheel {:on-jsload "rr.core/on-js-reload"}
                 :compiler {:main rr.core
                            :asset-path "js/compiled/out"
@@ -48,11 +48,12 @@
             ;; :ring-handler hello_world.server/handler
             ;; if you want to disable the REPL
             ;; :repl false
-  :profiles {:dev {:dependencies [[binaryage/devtools "0.8.2"]
+  :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]
+                                  [binaryage/devtools "0.8.2"]
                                   [figwheel-sidecar "0.5.8"]
                                   [com.cemerick/piggieback "0.2.1"]]
                    ;; need to add dev source path here to get user.clj loaded
-                   :source-paths ["src" "dev"]
+                   :source-paths ["src" "dev" "test"]
                    ;; for CIDER
                    ;; :plugins [[cider/cider-nrepl "0.12.0"]]
                    :repl-options {; for nREPL dev you really need to limit output
