@@ -1,0 +1,10 @@
+/* some style */
+
+.todo {
+  cursor: pointer;
+}
+
+.todo.done {
+  color: gray;
+  text-decoration: line-through;
+}
